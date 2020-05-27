@@ -1,0 +1,57 @@
+[
+  {
+    "id": "1",
+    "type": "Button",
+    "customId": "button1",
+    "data": {
+      "text": "Click Me"
+    },
+    "layout": {
+      "x": 450,
+      "y": 115,
+      "width": 142,
+      "height": 40
+    }
+  },
+  {
+    "id": "3",
+    "type": "Image",
+    "customId": "image1",
+    "data": {
+      "src": "https://static.wixstatic.com/media/11062b_3a11c4fcf7e1427ca0ac0c7fd142676e~mv2_d_5565_3710_s_4_2.jpg/v1/fill/w_600,h_400,al_c,q_80,usm_0.66_1.00_0.01/Golf%20Cart.webp"
+    },
+    "layout": {
+      "x": 450,
+      "y": 218,
+      "width": 600,
+      "height": 450
+    }
+  },
+  {
+    "id": "5",
+    "type": "Text",
+    "customId": "text1",
+    "data": {
+      "text": "TEXT be here"
+    },
+    "layout": {
+      "x": 850,
+      "y": 112
+    }
+  },
+  {
+    "id": "55",
+    "type": "Text",
+    "data": {
+      "text": "text without customId"
+    },
+    "layout": {
+      "x": 150,
+      "y": 612
+    }
+  },
+  {
+    "id": "100",
+    "type": "NoSuchType"
+  }
+]
