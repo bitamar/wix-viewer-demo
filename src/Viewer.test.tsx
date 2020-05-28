@@ -1,9 +1,9 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import Viewer from './Viewer';
+import React from "react";
+import { render } from "@testing-library/react";
+import Viewer from "./Viewer";
 
-test('renders learn react link', () => {
+test("renders custom text element", () => {
   const { getByText } = render(<Viewer />);
-  const linkElement = getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  const textElement = getByText(/TEXT be here/i);
+  expect(textElement).toBeInTheDocument();
 });
