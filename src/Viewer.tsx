@@ -4,7 +4,7 @@ import { Structure, getComponent } from "./Structure";
 // Fetch json with specific type.
 export async function fetchJson<T>(request: RequestInfo): Promise<T> {
   const response = await fetch(request);
-  return await response.json();
+  return response.json();
 }
 
 export default function Viewer(): JSX.Element {
@@ -18,9 +18,9 @@ export default function Viewer(): JSX.Element {
     })();
   }, []);
 
-  const elements = structure.map((item, i) => {
+  const elements = structure.map((item) => {
     const Component = getComponent(item.type);
-    if (Component) return <Component key={i} structure={item} />;
+    return Component ? <Component key={item.id} structure={item} /> : null;
   });
 
   return <>{elements}</>;

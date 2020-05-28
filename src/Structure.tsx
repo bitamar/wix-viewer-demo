@@ -1,4 +1,4 @@
-import React, { CSSProperties } from "react";
+import React from "react";
 
 type Data = {
   text?: string;
@@ -24,39 +24,44 @@ export type Structure = {
 
 type Props = { structure: Structure };
 
-function layoutStyle({ x, y, width, height }: Layout): CSSProperties {
-  const css: CSSProperties = {
+function getStyle(layout: Layout): React.CSSProperties {
+  const css: React.CSSProperties = {
     position: "absolute",
-    top: `${y}px`,
-    left: `${x}px`,
+    top: `${layout.y}px`,
+    left: `${layout.x}px`,
   };
-  if (width) css["width"] = `${width}px`;
-  if (height) css["height"] = `${height}px`;
+
+  if (layout.width) css.width = `${layout.width}px`;
+  if (layout.height) css.height = `${layout.height}px`;
 
   return css;
 }
 
-function Button(props: Props): JSX.Element {
-  const { data, layout } = props.structure;
-  return <button style={layoutStyle(layout)}>{data.text}</button>;
+function Button({ structure }: Props): JSX.Element {
+  const { data, layout } = structure;
+  return (
+    <button type="button" style={getStyle(layout)}>
+      {data.text}
+    </button>
+  );
 }
 
-function Image(props: Props): JSX.Element {
-  const { data, layout } = props.structure;
-  return <img style={layoutStyle(layout)} src={data.src} alt="" />;
+function Image({ structure }: Props): JSX.Element {
+  const { data, layout } = structure;
+  return <img style={getStyle(layout)} src={data.src} alt="" />;
 }
 
-function Text(props: Props): JSX.Element {
-  const { data, layout } = props.structure;
-  return <span style={layoutStyle(layout)}>{data.text}</span>;
+function Text({ structure }: Props): JSX.Element {
+  const { data, layout } = structure;
+  return <span style={getStyle(layout)}>{data.text}</span>;
 }
 
 export function getComponent(name: Element): (props: Props) => JSX.Element {
   // noinspection JSUnusedGlobalSymbols
   const components = {
-    Button: Button,
-    Text: Text,
-    Image: Image,
+    Button,
+    Text,
+    Image,
   };
   return components[name];
 }
