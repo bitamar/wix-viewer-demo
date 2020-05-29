@@ -24,6 +24,10 @@ export type Structure = {
 
 type Props = { structure: Structure };
 
+export function itemId({ customId, id }: Structure): string {
+  return customId || id;
+}
+
 function getStyle(layout: Layout): React.CSSProperties {
   const css: React.CSSProperties = {
     position: "absolute",
@@ -40,7 +44,7 @@ function getStyle(layout: Layout): React.CSSProperties {
 function Button({ structure }: Props): JSX.Element {
   const { data, layout } = structure;
   return (
-    <button type="button" style={getStyle(layout)}>
+    <button type="button" style={getStyle(layout)} id={itemId(structure)}>
       {data.text}
     </button>
   );
@@ -48,12 +52,23 @@ function Button({ structure }: Props): JSX.Element {
 
 function Image({ structure }: Props): JSX.Element {
   const { data, layout } = structure;
-  return <img style={getStyle(layout)} src={data.src} alt="" />;
+  return (
+    <img
+      style={getStyle(layout)}
+      id={itemId(structure)}
+      src={data.src}
+      alt=""
+    />
+  );
 }
 
 function Text({ structure }: Props): JSX.Element {
   const { data, layout } = structure;
-  return <span style={getStyle(layout)}>{data.text}</span>;
+  return (
+    <span style={getStyle(layout)} id={itemId(structure)}>
+      {data.text}
+    </span>
+  );
 }
 
 export function getComponent(name: Element): (props: Props) => JSX.Element {
