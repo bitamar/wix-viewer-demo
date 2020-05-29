@@ -1,5 +1,5 @@
 /* eslint-disable no-console,@typescript-eslint/no-unused-vars */
-
+console.log("worker.js");
 // structureMap keeps track of everything $w need to return from getters.
 let structureMap = new Map();
 const callbacks = [];

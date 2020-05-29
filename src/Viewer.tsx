@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Structure, getComponent } from "./Structure";
-import { handleUserCodeMessage, userCodeAttributes } from "./userCodeUtils";
-
-const userCode = new Worker("worker.js");
+import UserCode from "./UserCode";
 
 // Fetch json with specific type.
 export async function fetchJson<T>(request: RequestInfo): Promise<T> {
@@ -21,26 +19,15 @@ export default function Viewer(): JSX.Element {
     })();
   }, []);
 
-  useEffect(() => {
-    if (!structure.length) return;
-    const structureMap = userCodeAttributes(structure);
-
-    userCode.onmessage = ({ data }) => {
-      // eslint-disable-next-line no-console
-      console.log("userCode to main", data);
-      handleUserCodeMessage(userCode, data);
-    };
-    userCode.postMessage({ command: "setStructure", structureMap });
-    userCode.postMessage({
-      command: "runCode",
-      url: "http://localhost:3000/userCode.js",
-    });
-  }, [structure]);
-
   const elements = structure.map((item) => {
     const Component = getComponent(item.type);
     return Component ? <Component key={item.id} structure={item} /> : null;
   });
 
-  return <>{elements}</>;
+  return (
+    <>
+      {elements}
+      <UserCode structure={structure} />
+    </>
+  );
 }
