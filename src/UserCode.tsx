@@ -75,7 +75,7 @@ export default function UserCode({ structure, root }: Props): JSX.Element {
       command: "runCode",
       url: "http://localhost:3000/code.js",
     });
-  }, [structure]);
+  }, [root, structure]);
 
   return <></>;
 }
