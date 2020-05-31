@@ -22,8 +22,6 @@ export type Structure = {
   layout: Layout;
 };
 
-type Props = { structure: Structure };
-
 export function itemId({ customId, id }: Structure): string {
   return customId || id;
 }
@@ -40,6 +38,8 @@ function getStyle(layout: Layout): React.CSSProperties {
 
   return css;
 }
+
+type Props = { structure: Structure };
 
 function Button({ structure }: Props): JSX.Element {
   const { data, layout } = structure;

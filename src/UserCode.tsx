@@ -20,15 +20,18 @@ function userCodeAttributes(structure: Structure[]): Map<string, Attributes> {
 
 type UserCodeMessage = { command: string; selector: string; value: string };
 
-function handleUserCodeMessage(worker: Worker, data: UserCodeMessage): void {
+function handleUserCodeMessage(
+  root: HTMLElement,
+  worker: Worker,
+  data: UserCodeMessage,
+): void {
   // Currently only selecting by the actual id.
   if (!data.selector.match(/^#\w(\w|-)*$/)) {
     logError("invalid selector", data.selector);
     return;
   }
 
-  // TODO: only search under the root element.
-  const element = document.getElementById(data.selector.substring(1));
+  const element: HTMLElement | null = root.querySelector(data.selector);
   if (!element) {
     logError("no such element", data.selector);
     return;
@@ -56,16 +59,16 @@ function handleUserCodeMessage(worker: Worker, data: UserCodeMessage): void {
 
 const userCode = new Worker("worker.js");
 
-type Props = { structure: Structure[] };
+type Props = { structure: Structure[]; root: HTMLElement };
 
-export default function UserCode({ structure }: Props): JSX.Element {
+export default function UserCode({ structure, root }: Props): JSX.Element {
   useEffect(() => {
     const structureMap = userCodeAttributes(structure);
 
     userCode.onmessage = ({ data }) => {
       // eslint-disable-next-line no-console
       console.log("userCode to main", data);
-      handleUserCodeMessage(userCode, data);
+      handleUserCodeMessage(root, userCode, data);
     };
     userCode.postMessage({ command: "setStructure", structureMap });
     userCode.postMessage({
