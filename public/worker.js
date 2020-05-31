@@ -1,16 +1,14 @@
-/* eslint-disable no-console,@typescript-eslint/no-unused-vars */
+/* eslint-disable no-console */
 console.log("worker.js");
 // structureMap keeps track of everything $w need to return from getters.
 let structureMap = new Map();
 const callbacks = [];
 
-// noinspection JSUnusedLocalSymbols
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function $w(selector) {
   const elementId = selector.substring(1);
 
   const structure = structureMap.get(elementId);
-  console.log(structure);
-  // if (!elementAttributes) return undefined;
 
   return {
     set text(text) {
