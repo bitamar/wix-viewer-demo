@@ -45,8 +45,8 @@ function $w(selector) {
 self.onmessage = async ({ data }) => {
   console.log("main to userCode", data);
 
-  switch (data.command) {
-    case "init":
+  const commands = {
+    init: () => {
       itemsMap = data.itemsMap;
 
       fetch(data.codeUrl)
@@ -54,14 +54,15 @@ self.onmessage = async ({ data }) => {
         // eslint-disable-next-line no-eval
         .then((code) => eval(code))
         .then(() => postMessage({ command: "userCodeRan" }));
-      break;
-
-    case "callback":
+    },
+    callback: () => {
       console.log("running worker callback #", data.callbackId);
       callbacks[data.callbackId]();
-      break;
-
-    default:
-      console.log(`unknown command ${data.command}`);
+    },
+  };
+  if (!commands[data.command]) {
+    console.log(`unknown command ${data.command}`);
+    return;
   }
+  commands[data.command]();
 };

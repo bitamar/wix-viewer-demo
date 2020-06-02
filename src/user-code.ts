@@ -15,23 +15,24 @@ function updateItem(
   message: UserCodeMessage,
   callbackMessage: (callbackId: string) => void,
 ): void {
-  switch (message.command) {
-    case "setText":
+  const commands = {
+    setText: () => {
       item.data.text = message.value;
-      break;
-
-    case "setSrc":
+    },
+    setSrc: () => {
       item.data.src = message.value;
-      break;
-
-    case "setOnClick":
+    },
+    setOnClick: () => {
       // TODO: Not on data.
       item.data.onClick = () => callbackMessage(message.value);
-      break;
+    },
+  };
 
-    default:
-      logError("no such command", message.command);
+  if (!commands[message.command]) {
+    logError("no such command", message.command);
+    return;
   }
+  commands[message.command]();
 }
 
 export default function initWorker(
