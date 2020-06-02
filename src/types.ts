@@ -1,7 +1,6 @@
 export type Data = {
   text?: string;
   src?: string;
-  onClick?: () => void;
 };
 
 export type Layout = {
@@ -18,6 +17,7 @@ export type Item = {
   type: Element;
   data: Data;
   layout: Layout;
+  onClick?: () => void;
 };
 
 export interface Items {

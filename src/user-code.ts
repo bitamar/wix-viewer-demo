@@ -23,8 +23,7 @@ function updateItem(
       item.data.src = message.value;
     },
     setOnClick: () => {
-      // TODO: Not on data.
-      item.data.onClick = () => callbackMessage(message.value);
+      item.onClick = () => callbackMessage(message.value);
     },
   };
 
@@ -59,10 +58,7 @@ export default function initWorker(
     }
 
     // TODO: Instead of this if, there should be a way with promises.
-    if (userCodeRan) {
-      // TODO: Move userCode logic to another file or function. And add hasUserCode param.
-      render(itemsMap);
-    }
+    if (userCodeRan) render(itemsMap);
   };
 
   worker.postMessage({

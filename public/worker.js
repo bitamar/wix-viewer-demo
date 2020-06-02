@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-
+// TODO: Can the code.js have no access to the global scope here?
 console.log("worker.js");
 
 // structureMap keeps track of everything $w need to return from getters.

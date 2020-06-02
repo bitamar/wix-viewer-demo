@@ -11,6 +11,7 @@ async function fetchJson<T>(request: RequestInfo): Promise<T> {
   return response.json();
 }
 
+// TODO: Allow to re-render only a single element, instead of the entire tree.
 function render(itemsMap: Items) {
   ReactDom.render(
     <Renderer items={Object.values(itemsMap)} />,

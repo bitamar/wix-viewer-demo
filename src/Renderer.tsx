@@ -1,7 +1,7 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console,react/jsx-props-no-spreading */
 
 import React from "react";
-import { Item, Layout } from "./types";
+import { Data, Item, Layout } from "./types";
 
 function wrapperStyle(layout: Layout): React.CSSProperties {
   return {
@@ -21,33 +21,29 @@ function elementStyle(layout: Layout): React.CSSProperties {
 }
 
 type Props = {
-  item: Item;
+  data: Data;
   style: React.CSSProperties;
+  onClick?: () => void;
 };
 
-// TODO: Set text should only re-run this function (Not image etc.)
-function Button({ item, style }: Props): JSX.Element {
+function Button({ data, style, onClick }: Props): JSX.Element {
   console.log("Button");
 
-  const { data } = item;
-
   return (
-    <button type="button" style={style} onClick={data.onClick}>
+    <button type="button" style={style} onClick={onClick}>
       {data.text}
     </button>
   );
 }
 
-function Image({ item, style }: Props): JSX.Element {
+function Image({ data, style }: Props): JSX.Element {
   console.log("Image");
-  const { data } = item;
-  // TODO: Add optional caption below the image.
+
   return <img src={data.src} alt="" style={style} />;
 }
 
-function Text({ item }: Props): JSX.Element {
+function Text({ data }: Props): JSX.Element {
   console.log("Text");
-  const { data } = item;
   return <span>{data.text}</span>;
 }
 
@@ -57,10 +53,9 @@ function renderComponent(item: Item): JSX.Element | undefined {
 
   if (!Component) return undefined;
 
-  // TODO: Maybe change to prop spreading.
   return (
     <div key={item.id} style={wrapperStyle(item.layout)} id={item.id}>
-      <Component item={item} style={elementStyle(item.layout)} />
+      <Component {...item} style={elementStyle(item.layout)} />
     </div>
   );
 }
