@@ -1,7 +1,8 @@
 import React from "react";
-import { render } from "react-dom";
-import { Item } from "./Renderer";
-import Viewer from "./Viewer";
+import ReactDom from "react-dom";
+import Renderer from "./Renderer";
+import initWorker from "./user-code";
+import { Items } from "./types";
 
 import "./index.css";
 
@@ -10,10 +11,18 @@ async function fetchJson<T>(request: RequestInfo): Promise<T> {
   return response.json();
 }
 
-(async () => {
-  const url = "http://localhost:3000/siteStructure.json";
-  const items = await fetchJson<Item[]>(url);
+function render(itemsMap: Items) {
+  ReactDom.render(
+    <Renderer items={Object.values(itemsMap)} />,
+    document.getElementById("root"),
+  );
+}
 
-  // TODO: Move usercode logic here, and mock rerender from here.
-  render(<Viewer items={items} />, document.getElementById("root"));
+(async () => {
+  const url = "http://localhost:3000/structure.json";
+  const itemsMap = await fetchJson<Items>(url);
+
+  const hasUserCode = true;
+  if (hasUserCode) initWorker(itemsMap, render);
+  else render(itemsMap);
 })();

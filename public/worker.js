@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 
+console.log("worker.js");
+
 // structureMap keeps track of everything $w need to return from getters.
 let itemsMap = new Map();
 const callbacks = [];
@@ -8,7 +10,7 @@ const callbacks = [];
 function $w(selector) {
   const elementId = selector.substring(1);
 
-  const item = itemsMap.get(elementId);
+  const item = itemsMap[elementId];
 
   // noinspection JSUnusedGlobalSymbols
   return {

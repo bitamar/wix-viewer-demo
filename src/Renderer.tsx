@@ -1,33 +1,7 @@
 /* eslint-disable no-console */
 
 import React from "react";
-
-type Data = {
-  text?: string;
-  src?: string;
-  onClick?: () => void;
-};
-
-type Layout = {
-  x: number;
-  y: number;
-  width?: number;
-  height?: number;
-};
-
-type Element = "Button" | "Image" | "Text";
-
-export type Item = {
-  id: string;
-  type: Element;
-  customId?: string;
-  data: Data;
-  layout: Layout;
-};
-
-export function itemId({ customId, id }: Item): string {
-  return customId || id;
-}
+import { Item, Layout } from "./types";
 
 function wrapperStyle(layout: Layout): React.CSSProperties {
   return {
@@ -85,7 +59,7 @@ function renderComponent(item: Item): JSX.Element | undefined {
 
   // TODO: Maybe change to prop spreading.
   return (
-    <div key={item.id} style={wrapperStyle(item.layout)} id={itemId(item)}>
+    <div key={item.id} style={wrapperStyle(item.layout)} id={item.id}>
       <Component item={item} style={elementStyle(item.layout)} />
     </div>
   );
