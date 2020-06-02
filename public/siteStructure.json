@@ -14,6 +14,20 @@
     }
   },
   {
+    "id": "22",
+    "type": "Button",
+    "customId": "button2",
+    "data": {
+      "text": "Don't Click Me"
+    },
+    "layout": {
+      "x": 610,
+      "y": 115,
+      "width": 142,
+      "height": 40
+    }
+  },
+  {
     "id": "3",
     "type": "Image",
     "customId": "image1",
