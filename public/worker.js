@@ -35,7 +35,7 @@ function $w(selector) {
       const callbackId = callbacks.length;
       callbacks.push(callback);
       console.log("added callback #", callbackId);
-      postMessage({ command: "setOnClick", selector, value: callbackId });
+      postMessage({ command: "setOnClick", selector, callbackId });
     },
   };
 }
