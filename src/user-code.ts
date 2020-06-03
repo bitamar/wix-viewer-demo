@@ -1,69 +1,60 @@
-/* eslint-disable no-param-reassign,no-console */
-
-import { Item, Items } from "./types";
+/* eslint-disable no-console */
+import { toJS } from "mobx";
+import { Data, Item, Items } from "./types";
 import logError from "./error";
 
 type UserCodeMessage = {
-  command: "setText" | "setSrc" | "setOnClick";
-  selector: string;
-  value: string;
+  data: {
+    command: "setData" | "setOnClick" | "userCodeRan";
+    selector: string;
+    overrideData?: Data;
+    callbackId?: string;
+  };
 };
 
-// eslint-disable-next-line no-param-reassign
-function updateItem(
-  item: Item,
-  message: UserCodeMessage,
-  callbackMessage: (callbackId: string) => void,
-): void {
-  const commands = {
-    setText: () => {
-      item.data.text = message.value;
-    },
-    setSrc: () => {
-      item.data.src = message.value;
-    },
-    setOnClick: () => {
-      item.onClick = () => callbackMessage(message.value);
-    },
-  };
+export default function (itemsMap: Items): Promise<void> {
+  return new Promise((resolve) => {
+    const worker = new Worker("worker.js");
 
-  if (!commands[message.command]) {
-    logError("no such command", message.command);
-    return;
-  }
-  commands[message.command]();
-}
+    worker.onmessage = ({ data }: UserCodeMessage) => {
+      console.log("worker to main", data);
 
-export default function initWorker(
-  itemsMap: Items,
-  render: (items: Items) => void,
-): void {
-  const worker = new Worker("worker.js");
-  const callbackMessage = (callbackId: string) => {
-    worker.postMessage({ command: "callback", callbackId });
-  };
+      const getItem = (): Item => {
+        const key = data.selector.substring(1);
+        return itemsMap[key];
+      };
 
-  // Don't render anything before first userCode run, to re-render
-  // on each worker set command.
-  let userCodeRan = false;
-  worker.onmessage = ({ data }) => {
-    console.log("worker to main", data);
+      const commands = {
+        setData: () => {
+          const item = getItem();
+          if (!item) return;
 
-    if (data.command === "userCodeRan") userCodeRan = true;
-    else {
-      const key = data.selector.substring(1);
-      const item = itemsMap[key];
-      if (!item) return;
-      updateItem(item, data, callbackMessage);
-    }
+          Object.assign(item.data, data.overrideData);
+        },
+        setOnClick: () => {
+          const item = getItem();
+          if (!item) return;
 
-    // TODO: Instead of this if, there should be a way with promises.
-    if (userCodeRan) render(itemsMap);
-  };
+          item.onClick = () => {
+            worker.postMessage({
+              command: "callback",
+              callbackId: data.callbackId,
+            });
+          };
+        },
+        userCodeRan: () => resolve(),
+      };
+      if (!commands[data.command]) {
+        logError("no such command", data.command);
+        return;
+      }
+      commands[data.command]();
+    };
 
-  worker.postMessage({
-    command: "init",
-    itemsMap,
-    codeUrl: "http://localhost:3000/code.js",
+    worker.postMessage({
+      command: "init",
+      itemsMap: toJS(itemsMap),
+      codeUrl: "http://localhost:3000/code.js",
+    });
   });
 }

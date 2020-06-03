@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
-// TODO: Can the code.js have no access to the global scope here?
-console.log("worker.js");
+// TODO: Can the code.js have no access to the callbacks list?
 
 // structureMap keeps track of everything $w need to return from getters.
 let itemsMap = new Map();
@@ -16,7 +15,7 @@ function $w(selector) {
   return {
     set text(text) {
       item.data.text = text;
-      postMessage({ command: "setText", selector, value: text });
+      postMessage({ command: "setData", selector, overrideData: { text } });
     },
 
     get text() {
@@ -25,7 +24,7 @@ function $w(selector) {
 
     set src(url) {
       item.data.src = url;
-      postMessage({ command: "setSrc", selector, value: url });
+      postMessage({ command: "setData", selector, overrideData: { src: url } });
     },
 
     get src() {

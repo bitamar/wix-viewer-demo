@@ -1,7 +1,10 @@
 import React from "react";
 import ReactDom from "react-dom";
+import "mobx-react-lite/batchingForReactDom";
+import { observable } from "mobx";
+
 import Renderer from "./Renderer";
-import initWorker from "./user-code";
+import initUserCode from "./user-code";
 import { Items } from "./types";
 
 import "./index.css";
@@ -11,19 +14,21 @@ async function fetchJson<T>(request: RequestInfo): Promise<T> {
   return response.json();
 }
 
-// TODO: Allow to re-render only a single element, instead of the entire tree.
-function render(itemsMap: Items) {
+function render(items: Items) {
   ReactDom.render(
-    <Renderer items={Object.values(itemsMap)} />,
+    <Renderer items={Object.values(items)} />,
     document.getElementById("root"),
   );
 }
 
 (async () => {
   const url = "http://localhost:3000/structure.json";
-  const itemsMap = await fetchJson<Items>(url);
+  const json = await fetchJson<Items>(url);
+  const items = observable(json);
 
-  const hasUserCode = true;
-  if (hasUserCode) initWorker(itemsMap, render);
-  else render(itemsMap);
+  // Don't render anything before first userCode run, to avoid re-rendering
+  // on each worker set command.
+  await initUserCode(items);
+
+  render(items);
 })();

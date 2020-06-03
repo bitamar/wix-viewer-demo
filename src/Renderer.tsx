@@ -1,6 +1,7 @@
 /* eslint-disable no-console,react/jsx-props-no-spreading */
 
 import React from "react";
+import { observer } from "mobx-react-lite";
 import { Data, Item, Layout } from "./types";
 
 function wrapperStyle(layout: Layout): React.CSSProperties {
@@ -26,31 +27,37 @@ type Props = {
   onClick?: () => void;
 };
 
-function Button({ data, style, onClick }: Props): JSX.Element {
-  console.log("Button");
+const Button = observer(
+  ({ data, style, onClick }: Props): JSX.Element => {
+    console.log("Button");
 
-  return (
-    <button type="button" style={style} onClick={onClick}>
-      {data.text}
-    </button>
-  );
-}
+    return (
+      <button type="button" style={style} onClick={onClick}>
+        {data.text}
+      </button>
+    );
+  },
+);
 
-function Image({ data, style }: Props): JSX.Element {
-  console.log("Image");
+const Image = observer(
+  ({ data, style }: Props): JSX.Element => {
+    console.log("Image");
 
-  return <img src={data.src} alt="" style={style} />;
-}
+    return <img src={data.src} alt="" style={style} />;
+  },
+);
 
-function Text({ data }: Props): JSX.Element {
-  console.log("Text");
-  return <span>{data.text}</span>;
-}
+const Text = observer(
+  ({ data }: Props): JSX.Element => {
+    console.log("Text");
+
+    return <span>{data.text}</span>;
+  },
+);
 
 function renderComponent(item: Item): JSX.Element | undefined {
   const components = { Button, Text, Image };
   const Component = components[item.type];
-
   if (!Component) return undefined;
 
   return (
