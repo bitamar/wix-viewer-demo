@@ -1,6 +1,4 @@
-/* eslint-disable no-console */
-
-// TODO: Can the code.js have no access to change the callbacks list?
+// TODO: Can the eval code be prevented from changing the callbacks list?
 
 // structureMap keeps track of everything $w need to return from getters.
 let itemsMap = new Map();
@@ -12,34 +10,43 @@ function $w(selector) {
 
   const item = itemsMap[elementId];
 
-  // TODO: Return only the correct getters and setters according to the element type.
-  // noinspection JSUnusedGlobalSymbols
-  return {
-    set text(text) {
-      item.data.text = text;
-      postMessage({ command: "setData", selector, overrideData: { text } });
+  const properties = {
+    Button: {
+      onClick(callback) {
+        const callbackId = callbacks.length;
+        callbacks.push(callback);
+        console.log("added callback #", callbackId);
+        postMessage({ command: "setOnClick", selector, callbackId });
+      },
     },
 
-    get text() {
-      return item ? item.data.text : undefined;
+    Image: {
+      set src(url) {
+        item.data.src = url;
+        postMessage({
+          command: "setData",
+          selector,
+          overrideData: { src: url },
+        });
+      },
+
+      get src() {
+        return item ? item.data.src : undefined;
+      },
     },
 
-    set src(url) {
-      item.data.src = url;
-      postMessage({ command: "setData", selector, overrideData: { src: url } });
-    },
+    Text: {
+      set text(text) {
+        item.data.text = text;
+        postMessage({ command: "setData", selector, overrideData: { text } });
+      },
 
-    get src() {
-      return item ? item.data.src : undefined;
-    },
-
-    onClick(callback) {
-      const callbackId = callbacks.length;
-      callbacks.push(callback);
-      console.log("added callback #", callbackId);
-      postMessage({ command: "setOnClick", selector, callbackId });
+      get text() {
+        return item ? item.data.text : undefined;
+      },
     },
   };
+  return properties[item.type];
 }
 
 // eslint-disable-next-line no-restricted-globals
