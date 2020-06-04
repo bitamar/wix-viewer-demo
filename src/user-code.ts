@@ -1,6 +1,4 @@
-/* eslint-disable no-console */
-import { toJS } from "mobx";
-import { Data, Item, Items } from "./types";
+import { Data, Item, Items, Rerender } from "./types";
 import logError from "./error";
 
 type UserCodeMessage = {
@@ -12,7 +10,7 @@ type UserCodeMessage = {
   };
 };
 
-export default function (itemsMap: Items): Promise<void> {
+export default function (itemsMap: Items, rerender: Rerender): Promise<void> {
   return new Promise((resolve) => {
     const worker = new Worker("worker.js");
 
@@ -30,6 +28,7 @@ export default function (itemsMap: Items): Promise<void> {
           if (!item) return;
 
           Object.assign(item.data, data.overrideData);
+          rerender.rerender(item.id);
         },
         setOnClick: () => {
           const item = getItem();
@@ -41,6 +40,7 @@ export default function (itemsMap: Items): Promise<void> {
               callbackId: data.callbackId,
             });
           };
+          rerender.rerender(item.id);
         },
         userCodeRan: () => resolve(),
       };
@@ -53,7 +53,7 @@ export default function (itemsMap: Items): Promise<void> {
 
     worker.postMessage({
       command: "init",
-      itemsMap: toJS(itemsMap),
+      itemsMap,
       codeUrl: "http://localhost:3000/code.js",
     });
   });

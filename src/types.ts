@@ -23,3 +23,12 @@ export type Item = {
 export interface Items {
   [id: string]: Item;
 }
+
+export interface Rerenders {
+  [id: string]: () => void;
+}
+
+export type Rerender = {
+  add: (id: string, renderer: () => void) => void;
+  rerender: (id: string) => void;
+};

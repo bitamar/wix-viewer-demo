@@ -27,6 +27,9 @@ module.exports = {
     quotes: [2, "double", { avoidEscape: true }],
     "react/jsx-filename-extension": [2, { extensions: [".ts", ".tsx"] }],
     "import/extensions": 0,
+    "object-curly-newline": ["error", { ImportDeclaration: "never" }],
+    "no-console": "off",
+    "react/jsx-props-no-spreading": "off",
   },
   settings: {
     "import/resolver": {

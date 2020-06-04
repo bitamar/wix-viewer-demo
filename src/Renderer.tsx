@@ -1,8 +1,5 @@
-/* eslint-disable no-console,react/jsx-props-no-spreading */
-
-import React from "react";
-import { observer } from "mobx-react-lite";
-import { Data, Item, Layout } from "./types";
+import React, { useState } from "react";
+import { Data, Item, Layout, Rerender } from "./types";
 
 function wrapperStyle(layout: Layout): React.CSSProperties {
   return {
@@ -27,48 +24,67 @@ type Props = {
   onClick?: () => void;
 };
 
-const Button = observer(
-  ({ data, style, onClick }: Props): JSX.Element => {
-    console.log("Button");
-
-    return (
-      <button type="button" style={style} onClick={onClick}>
-        {data.text}
-      </button>
-    );
-  },
-);
-
-const Image = observer(
-  ({ data, style }: Props): JSX.Element => {
-    console.log("Image");
-
-    return <img src={data.src} alt="" style={style} />;
-  },
-);
-
-const Text = observer(
-  ({ data }: Props): JSX.Element => {
-    console.log("Text");
-
-    return <span>{data.text}</span>;
-  },
-);
-
-function renderComponent(item: Item): JSX.Element | undefined {
-  const components = { Button, Text, Image };
-  const Component = components[item.type];
-  if (!Component) return undefined;
+function Button({ data, style, onClick }: Props): JSX.Element {
+  console.log("Button");
 
   return (
-    <div key={item.id} style={wrapperStyle(item.layout)} id={item.id}>
+    <button type="button" style={style} onClick={onClick}>
+      {data.text}
+    </button>
+  );
+}
+
+function Image({ data, style }: Props): JSX.Element {
+  console.log("Image");
+
+  return <img src={data.src} alt="" style={style} />;
+}
+
+function Text({ data }: Props): JSX.Element {
+  console.log("Text");
+
+  return <span>{data.text}</span>;
+}
+
+// TODO: Iframe component that can enlarge itself.
+
+// TODO: Component from url in the structure.
+
+const components = { Button, Text, Image };
+
+function StructureComponent({
+  item,
+  rerender,
+}: {
+  item: Item;
+  rerender: Rerender;
+}): JSX.Element {
+  const Component = components[item.type];
+  const [state, setState] = useState(false);
+
+  rerender.add(item.id, () => setState(!state));
+
+  return (
+    <div style={wrapperStyle(item.layout)} id={item.id}>
       <Component {...item} style={elementStyle(item.layout)} />
     </div>
   );
 }
 
-export default function ({ items }: { items: Item[] }): JSX.Element {
+export default function ({
+  items,
+  rerender,
+}: {
+  items: Item[];
+  rerender: Rerender;
+}): JSX.Element {
   console.log("Renderer");
 
-  return <div id="renderer">{items.map(renderComponent)}</div>;
+  return (
+    <div id="renderer">
+      {items.map((item) => (
+        <StructureComponent key={item.id} item={item} rerender={rerender} />
+      ))}
+    </div>
+  );
 }

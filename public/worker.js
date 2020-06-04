@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
-// TODO: Can the code.js have no access to the callbacks list?
+
+// TODO: Can the code.js have no access to change the callbacks list?
 
 // structureMap keeps track of everything $w need to return from getters.
 let itemsMap = new Map();
@@ -11,6 +12,7 @@ function $w(selector) {
 
   const item = itemsMap[elementId];
 
+  // TODO: Return only the correct getters and setters according to the element type.
   // noinspection JSUnusedGlobalSymbols
   return {
     set text(text) {
@@ -54,10 +56,7 @@ self.onmessage = async ({ data }) => {
         .then((code) => eval(code))
         .then(() => postMessage({ command: "userCodeRan" }));
     },
-    callback: () => {
-      console.log("running worker callback #", data.callbackId);
-      callbacks[data.callbackId]();
-    },
+    callback: () => callbacks[data.callbackId](),
   };
   if (!commands[data.command]) {
     console.log(`unknown command ${data.command}`);
