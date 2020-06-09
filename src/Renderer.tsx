@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Data, Item, Layout, Rerender } from "./types";
+import React, { useEffect, useState } from "react";
+import { Item, Layout, Rerender } from "./types";
 
 function wrapperStyle(layout: Layout): React.CSSProperties {
   return {
@@ -18,13 +18,12 @@ function elementStyle(layout: Layout): React.CSSProperties {
   return css;
 }
 
-type Props = {
-  data: Data;
+type ButtonProps = {
+  data: { text: string };
   style: React.CSSProperties;
   onClick?: () => void;
 };
-
-function Button({ data, style, onClick }: Props): JSX.Element {
+function Button({ data, style, onClick }: ButtonProps): JSX.Element {
   console.log("Button");
 
   return (
@@ -34,23 +33,69 @@ function Button({ data, style, onClick }: Props): JSX.Element {
   );
 }
 
-function Image({ data, style }: Props): JSX.Element {
+type ImageProps = {
+  data: { src: string };
+  style: React.CSSProperties;
+};
+function Image({ data, style }: ImageProps): JSX.Element {
   console.log("Image");
 
   return <img src={data.src} alt="" style={style} />;
 }
 
-function Text({ data }: Props): JSX.Element {
+type TextProps = {
+  data: { text: string };
+  style: React.CSSProperties;
+};
+function Text({ data }: TextProps): JSX.Element {
   console.log("Text");
 
   return <span>{data.text}</span>;
 }
 
-// TODO: Iframe component that can enlarge itself.
+type IframeParams = { [key: string]: string };
+type IframeProps = {
+  id: string;
+  data: { src: string; title: string; params: IframeParams };
+  style: React.CSSProperties;
+};
+function Iframe({ id, data, style }: IframeProps): JSX.Element {
+  console.log("Iframe");
 
-// TODO: Component from url in the structure.
+  const url = new URL(data.src);
 
-const components = { Button, Text, Image };
+  if (data.params) {
+    Object.keys(data.params).forEach((key) => {
+      url.searchParams.set(key, data.params[key]);
+    });
+  }
+
+  // The iframe needs the element id, so it can send it with the messages
+  // to the main window.
+  url.searchParams.set("id", id);
+
+  return <iframe src={url.href} title={data.title} style={style} />;
+}
+
+type RemoteProps = {
+  data: { src: string };
+  style: React.CSSProperties;
+};
+function Remote({ data }: RemoteProps): JSX.Element {
+  const fetchText = async (request: RequestInfo): Promise<string> => {
+    const response = await fetch(request);
+    return response.text();
+  };
+
+  useEffect(() => {
+    fetchText(data.src).then((code) => {
+      // console.log(code);
+    });
+  });
+  return <div>{data.src}</div>;
+}
+
+const components = { Button, Iframe, Image, Remote, Text };
 
 function StructureComponent({
   item,
@@ -61,7 +106,6 @@ function StructureComponent({
 }): JSX.Element {
   const Component = components[item.type];
   const [state, setState] = useState(false);
-
   rerender.add(item.id, () => setState(!state));
 
   return (

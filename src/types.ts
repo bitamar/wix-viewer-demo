@@ -1,8 +1,3 @@
-export type Data = {
-  text?: string;
-  src?: string;
-};
-
 export type Layout = {
   x: number;
   y: number;
@@ -10,23 +5,22 @@ export type Layout = {
   height?: number;
 };
 
-type Element = "Button" | "Image" | "Text";
-
 export type Item = {
   id: string;
-  type: Element;
-  data: Data;
+  type: "Button" | "Iframe" | "Image" | "Remote" | "Text";
+  // TODO: Make data "unknown".
+  data: any;
   layout: Layout;
   onClick?: () => void;
 };
 
-export interface Items {
+export type Items = {
   [id: string]: Item;
-}
+};
 
-export interface Rerenders {
+export type Rerenders = {
   [id: string]: () => void;
-}
+};
 
 export type Rerender = {
   add: (id: string, renderer: () => void) => void;

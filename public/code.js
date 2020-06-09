@@ -10,5 +10,6 @@ $w("#button1").onClick(() => {
 });
 
 $w("#button2").onClick(() => {
-  $w("#text2").text = "button2 clicked";
+  const city = $w("#iframe1").params.city === "Baku" ? "Tel Aviv-Yafo" : "Baku";
+  $w("#iframe1").params = { city };
 });

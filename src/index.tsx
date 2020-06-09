@@ -4,7 +4,6 @@ import ReactDom from "react-dom";
 import Renderer from "./Renderer";
 import userCode from "./user-code";
 import { Items, Rerender, Rerenders } from "./types";
-
 import logError from "./error";
 
 import "./index.css";
@@ -23,7 +22,7 @@ const rerender: Rerender = (() => {
     },
     rerender: (id: string) => {
       if (!renderers[id]) {
-        logError("no rerenderer for id", id);
+        logError("no renderer for id", id);
         return;
       }
 
@@ -40,7 +39,7 @@ function render(items: Items) {
 }
 
 (async () => {
-  const url = "http://localhost:3000/structure.json";
+  const url = "/structure.json";
   const items = await fetchJson<Items>(url);
 
   // Don't render anything before first userCode run, to avoid re-rendering

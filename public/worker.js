@@ -9,6 +9,7 @@ function $w(selector) {
   const elementId = selector.substring(1);
 
   const item = itemsMap[elementId];
+  if (!item) return undefined;
 
   const properties = {
     Button: {
@@ -21,17 +22,13 @@ function $w(selector) {
     },
 
     Image: {
-      set src(url) {
-        item.data.src = url;
-        postMessage({
-          command: "setData",
-          selector,
-          overrideData: { src: url },
-        });
+      set src(src) {
+        item.data.src = src;
+        postMessage({ command: "setData", selector, overrideData: { src } });
       },
 
       get src() {
-        return item ? item.data.src : undefined;
+        return item.data.src;
       },
     },
 
@@ -42,7 +39,18 @@ function $w(selector) {
       },
 
       get text() {
-        return item ? item.data.text : undefined;
+        return item.data.text;
+      },
+    },
+
+    Iframe: {
+      set params(params) {
+        item.data.params = params;
+        postMessage({ command: "setData", selector, overrideData: { params } });
+      },
+
+      get params() {
+        return item.data.params;
       },
     },
   };
