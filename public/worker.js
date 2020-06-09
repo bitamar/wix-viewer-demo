@@ -19,6 +19,15 @@ function $w(selector) {
         console.log("added callback #", callbackId);
         postMessage({ command: "setOnClick", selector, callbackId });
       },
+
+      set text(text) {
+        item.data.text = text;
+        postMessage({ command: "setData", selector, overrideData: { text } });
+      },
+
+      get text() {
+        return item.data.text;
+      },
     },
 
     Image: {
