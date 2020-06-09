@@ -8,7 +8,6 @@ export type Layout = {
 export type Item = {
   id: string;
   type: "Button" | "Iframe" | "Image" | "Remote" | "Text";
-  // TODO: Make data "unknown".
   data: any;
   layout: Layout;
   onClick?: () => void;

@@ -1,14 +1,53 @@
-import { Item, Items, Rerender } from "./types";
+import { Items, Rerender } from "./types";
 import logError from "./error";
 
 type IncomingMessage = {
-  command: "setData" | "setOnClick" | "userCodeRan";
+  command: "setData" | "setLayout" | "setOnClick" | "userCodeRan";
   selector: string;
   overrideData?: unknown;
+  overrideLayout?: unknown;
+  callbackId?: string;
+};
+
+type OutgoingMessage = {
+  command: "callback";
   callbackId?: string;
 };
 
 export default function (itemsMap: Items, rerender: Rerender): Promise<void> {
+  const updateItem = (
+    id: string,
+    data: IncomingMessage,
+    postBack: (message: OutgoingMessage) => void,
+  ) => {
+    const item = itemsMap[id];
+    if (!item) return;
+
+    const commands: { [key: string]: () => void } = {
+      setData: () => {
+        Object.assign(item.data, data.overrideData);
+      },
+      setLayout: () => {
+        Object.assign(item.layout, data.overrideLayout);
+      },
+      setOnClick: () => {
+        item.onClick = () => {
+          postBack({
+            command: "callback",
+            callbackId: data.callbackId as string,
+          });
+        };
+      },
+    };
+    if (!commands[data.command]) {
+      console.log(data);
+      logError("no such command", data.command);
+      return;
+    }
+    commands[data.command]();
+    rerender.rerender(item.id);
+  };
+
   return new Promise((resolve) => {
     window.addEventListener("message", ({ data, origin }) => {
       if (!data?.payload?.id) return;
@@ -20,49 +59,23 @@ export default function (itemsMap: Items, rerender: Rerender): Promise<void> {
       const url = new URL(item.data.src);
       if (url.origin !== origin) return;
 
-      // TODO: Combine this as setLayout with the worker commands below.
-      if (!data?.payload?.overrideLayout) return;
-
-      Object.assign(item.layout, data.payload.overrideLayout);
-      rerender.rerender(item.id);
+      updateItem(item.id, data.payload, (message) => {
+        window.postMessage(message, origin);
+      });
     });
 
     const worker = new Worker("worker.js");
     worker.onmessage = ({ data }: { data: IncomingMessage }) => {
       console.log("worker to main", data);
 
-      const getItem = (): Item => {
-        const key = data.selector.substring(1);
-        return itemsMap[key];
-      };
-
-      const commands = {
-        setData: () => {
-          const item = getItem();
-          if (!item) return;
-
-          Object.assign(item.data, data.overrideData);
-          rerender.rerender(item.id);
-        },
-        setOnClick: () => {
-          const item = getItem();
-          if (!item) return;
-
-          item.onClick = () => {
-            worker.postMessage({
-              command: "callback",
-              callbackId: data.callbackId,
-            });
-          };
-          rerender.rerender(item.id);
-        },
-        userCodeRan: () => resolve(),
-      };
-      if (!commands[data.command]) {
-        logError("no such command", data.command);
+      if (data.command === "userCodeRan") {
+        resolve();
         return;
       }
-      commands[data.command]();
+
+      updateItem(data.selector.substring(1), data, (message) => {
+        worker.postMessage(message);
+      });
     };
 
     worker.postMessage({

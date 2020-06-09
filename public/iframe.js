@@ -8,7 +8,7 @@ const fullHeight = 600;
 window.resize = () => {
   const height = window.innerHeight !== initHeight ? initHeight : fullHeight;
   window.parent.postMessage(
-    { payload: { id, overrideLayout: { height } } },
+    { payload: { id, command: "setLayout", overrideLayout: { height } } },
     "*",
   );
 };
