@@ -15,7 +15,7 @@ code {
 }
 
 button {
-  background-color: black;
+  background-color: #3d3d3d;
   border: solid rgba(153, 153, 151, 1) 0;
   color: white;
   font-size: 15px;
@@ -27,6 +27,13 @@ button:hover {
   background-color: rgba(127, 204, 247, 0.7);
 }
 
+input {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+}
+
 iframe {
-  transition: all 1s;
+  transition: all 0.3s;
+  background-color: rgba(220, 220, 220, 0.9);
+  border: none;
 }

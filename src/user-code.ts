@@ -1,5 +1,4 @@
 import { Items, Rerender } from "./types";
-import logError from "./error";
 
 type IncomingMessage = {
   command: "setData" | "setLayout" | "setOnClick" | "userCodeRan";
@@ -10,15 +9,16 @@ type IncomingMessage = {
 };
 
 type OutgoingMessage = {
-  command: "callback";
+  command: "callback" | "setData";
   callbackId?: string;
+  overrideData?: unknown;
 };
 
 export default function (itemsMap: Items, rerender: Rerender): Promise<void> {
   const updateItem = (
     id: string,
     data: IncomingMessage,
-    postBack: (message: OutgoingMessage) => void,
+    postMessage: (message: OutgoingMessage) => void,
   ) => {
     const item = itemsMap[id];
     if (!item) return;
@@ -32,18 +32,13 @@ export default function (itemsMap: Items, rerender: Rerender): Promise<void> {
       },
       setOnClick: () => {
         item.onClick = () => {
-          postBack({
+          postMessage({
             command: "callback",
             callbackId: data.callbackId as string,
           });
         };
       },
     };
-    if (!commands[data.command]) {
-      console.log(data);
-      logError("no such command", data.command);
-      return;
-    }
     commands[data.command]();
     rerender.rerender(item.id);
   };
@@ -65,6 +60,7 @@ export default function (itemsMap: Items, rerender: Rerender): Promise<void> {
     });
 
     const worker = new Worker("worker.js");
+
     worker.onmessage = ({ data }: { data: IncomingMessage }) => {
       console.log("worker to main", data);
 
@@ -82,6 +78,29 @@ export default function (itemsMap: Items, rerender: Rerender): Promise<void> {
       command: "init",
       itemsMap,
       codeUrl: "/code.js",
+    });
+
+    // Adding a default onChange to all inputs, so the worker will have
+    // access to input values. Doing this after the "init" postMessage,
+    // because it's unable to send functions.
+    const inputs = Object.values(itemsMap).filter(
+      (item) => item.type === "Input",
+    );
+    inputs.forEach((item) => {
+      // eslint-disable-next-line no-param-reassign
+      item.onChange = ({ currentTarget }) => {
+        const { value } = currentTarget;
+
+        // TODO: Unify with updateItem.
+        // eslint-disable-next-line no-param-reassign
+        item.data.value = value;
+        worker.postMessage({
+          command: "setData",
+          id: item.id,
+          data: item.data,
+        });
+        rerender.rerender(item.id);
+      };
     });
   });
 }

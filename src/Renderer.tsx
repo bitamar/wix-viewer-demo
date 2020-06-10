@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { Item, Layout, Rerender } from "./types";
 
 function wrapperStyle(layout: Layout): React.CSSProperties {
@@ -24,7 +24,7 @@ type ButtonProps = {
   onClick?: () => void;
 };
 function Button({ data, style, onClick }: ButtonProps): JSX.Element {
-  console.log("Button");
+  console.log("React rendering Button");
 
   return (
     <button type="button" style={style} onClick={onClick}>
@@ -38,9 +38,21 @@ type ImageProps = {
   style: React.CSSProperties;
 };
 function Image({ data, style }: ImageProps): JSX.Element {
-  console.log("Image");
+  console.log("React rendering Image");
 
   return <img src={data.src} alt="" style={style} />;
+}
+
+type InputProps = {
+  data: { value?: string };
+  style: React.CSSProperties;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+};
+
+function Input({ data, style, onChange }: InputProps): JSX.Element {
+  console.log("React rendering Input");
+
+  return <input onChange={onChange} style={style} value={data.value} />;
 }
 
 type TextProps = {
@@ -48,7 +60,7 @@ type TextProps = {
   style: React.CSSProperties;
 };
 function Text({ data }: TextProps): JSX.Element {
-  console.log("Text");
+  console.log("React rendering Text");
 
   return <span>{data.text}</span>;
 }
@@ -60,7 +72,7 @@ type IframeProps = {
   style: React.CSSProperties;
 };
 function Iframe({ id, data, style }: IframeProps): JSX.Element {
-  console.log("Iframe");
+  console.log("React rendering Iframe");
 
   const url = new URL(data.src);
 
@@ -95,7 +107,7 @@ function Remote({ data }: RemoteProps): JSX.Element {
   return <div>{data.src}</div>;
 }
 
-const components = { Button, Iframe, Image, Remote, Text };
+const components = { Button, Iframe, Image, Input, Remote, Text };
 
 function StructureComponent({
   item,
@@ -122,7 +134,7 @@ export default function ({
   items: Item[];
   rerender: Rerender;
 }): JSX.Element {
-  console.log("Renderer");
+  console.log("React rendering Renderer");
 
   return (
     <div id="renderer">

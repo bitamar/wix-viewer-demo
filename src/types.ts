@@ -1,3 +1,5 @@
+import { ChangeEvent } from "react";
+
 export type Layout = {
   x: number;
   y: number;
@@ -7,10 +9,11 @@ export type Layout = {
 
 export type Item = {
   id: string;
-  type: "Button" | "Iframe" | "Image" | "Remote" | "Text";
+  type: "Button" | "Iframe" | "Image" | "Input" | "Remote" | "Text";
   data: any;
   layout: Layout;
   onClick?: () => void;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 export type Items = {

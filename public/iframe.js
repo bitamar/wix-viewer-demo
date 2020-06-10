@@ -3,7 +3,7 @@ const id = urlParams.get("id");
 const city = urlParams.get("city");
 
 const initHeight = 40;
-const fullHeight = 600;
+const fullHeight = 330;
 
 window.resize = () => {
   const height = window.innerHeight !== initHeight ? initHeight : fullHeight;
@@ -19,16 +19,20 @@ const headers = {
 };
 
 const url = `https://community-open-weather-map.p.rapidapi.com/weather?units=metric&q=${city}`;
+
 fetch(url, { method: "GET", headers })
   .then((response) => response.json())
   .then((json) => {
     if (json.message) return;
 
+    // noinspection JSUnresolvedVariable
     document.getElementById(
       "temp",
     ).innerText = `${json.name}: ${json.main.temp}°`;
 
-    const jsonPretty = JSON.stringify(json.main, null, 2);
-
-    document.getElementById("details").innerText = jsonPretty;
+    document.getElementById("details").innerText = JSON.stringify(
+      json.main,
+      null,
+      2,
+    );
   });

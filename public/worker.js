@@ -1,7 +1,7 @@
 // TODO: Can the eval code be prevented from changing the callbacks list?
 
 // structureMap keeps track of everything $w need to return from getters.
-let itemsMap = new Map();
+let itemsMap = {};
 const callbacks = [];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -16,17 +16,12 @@ function $w(selector) {
       onClick(callback) {
         const callbackId = callbacks.length;
         callbacks.push(callback);
-        console.log("added callback #", callbackId);
         postMessage({ command: "setOnClick", selector, callbackId });
       },
 
       set text(text) {
         item.data.text = text;
         postMessage({ command: "setData", selector, overrideData: { text } });
-      },
-
-      get text() {
-        return item.data.text;
       },
     },
 
@@ -38,6 +33,12 @@ function $w(selector) {
 
       get src() {
         return item.data.src;
+      },
+    },
+
+    Input: {
+      get value() {
+        return item.data.value;
       },
     },
 
@@ -57,34 +58,31 @@ function $w(selector) {
         item.data.params = params;
         postMessage({ command: "setData", selector, overrideData: { params } });
       },
-
-      get params() {
-        return item.data.params;
-      },
     },
   };
   return properties[item.type];
 }
 
 // eslint-disable-next-line no-restricted-globals
-self.onmessage = async ({ data }) => {
-  console.log("main to userCode", data);
+self.onmessage = async ({ data: message }) => {
+  console.log("main to userCode", message);
 
   const commands = {
     init: () => {
-      itemsMap = data.itemsMap;
+      itemsMap = message.itemsMap;
 
-      fetch(data.codeUrl)
+      fetch(message.codeUrl)
         .then((response) => response.text())
         // eslint-disable-next-line no-eval
         .then((code) => eval(code))
         .then(() => postMessage({ command: "userCodeRan" }));
     },
-    callback: () => callbacks[data.callbackId](),
+    setData: () => {
+      Object.assign(itemsMap[message.id].data, message.data);
+    },
+    callback: () => {
+      callbacks[message.callbackId]();
+    },
   };
-  if (!commands[data.command]) {
-    console.log(`unknown command ${data.command}`);
-    return;
-  }
-  commands[data.command]();
+  commands[message.command]();
 };
