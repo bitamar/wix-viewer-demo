@@ -15,7 +15,7 @@ window.resize = () => {
 
 const headers = {
   "x-rapidapi-host": "community-open-weather-map.p.rapidapi.com",
-  "x-rapidapi-key": "0dbf419b4cmsh2bc69fe83f2ec2ep12b92bjsn4ac285772512",
+  // "x-rapidapi-key": "0dbf419b4cmsh2bc69fe83f2ec2ep12b92bjsn4ac285772512",
 };
 
 const url = `https://community-open-weather-map.p.rapidapi.com/weather?units=metric&q=${city}`;

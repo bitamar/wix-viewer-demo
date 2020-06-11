@@ -1,66 +1,78 @@
-// TODO: Can the eval code be prevented from changing the callbacks list?
-
-// structureMap keeps track of everything $w need to return from getters.
 let itemsMap = {};
 const callbacks = [];
+
+function buttonSdk(item, selector) {
+  return {
+    onClick(callback) {
+      const callbackId = callbacks.length;
+      callbacks.push(callback);
+      postMessage({ command: "setOnClick", selector, callbackId });
+    },
+
+    set text(text) {
+      item.data.text = text;
+      postMessage({ command: "setData", selector, overrideData: { text } });
+    },
+  };
+}
+
+function imageSdk(item, selector) {
+  return {
+    set src(src) {
+      item.data.src = src;
+      postMessage({ command: "setData", selector, overrideData: { src } });
+    },
+
+    get src() {
+      return item.data.src;
+    },
+  };
+}
+
+function inputSdk(item, selector) {
+  return {
+    get value() {
+      return item.data.value;
+    },
+  };
+}
+
+function textSdk(item, selector) {
+  return {
+    set text(text) {
+      item.data.text = text;
+      postMessage({ command: "setData", selector, overrideData: { text } });
+    },
+
+    get text() {
+      return item.data.text;
+    },
+  };
+}
+
+function iframeSdk(item, selector) {
+  return {
+    set params(params) {
+      item.data.params = params;
+      postMessage({ command: "setData", selector, overrideData: { params } });
+    },
+  };
+}
+
+const componentSdks = {
+  Button: buttonSdk,
+  Image: imageSdk,
+  Input: inputSdk,
+  Text: textSdk,
+  Iframe: iframeSdk,
+};
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function $w(selector) {
   const elementId = selector.substring(1);
-
   const item = itemsMap[elementId];
-  if (!item) return undefined;
-
-  const properties = {
-    Button: {
-      onClick(callback) {
-        const callbackId = callbacks.length;
-        callbacks.push(callback);
-        postMessage({ command: "setOnClick", selector, callbackId });
-      },
-
-      set text(text) {
-        item.data.text = text;
-        postMessage({ command: "setData", selector, overrideData: { text } });
-      },
-    },
-
-    Image: {
-      set src(src) {
-        item.data.src = src;
-        postMessage({ command: "setData", selector, overrideData: { src } });
-      },
-
-      get src() {
-        return item.data.src;
-      },
-    },
-
-    Input: {
-      get value() {
-        return item.data.value;
-      },
-    },
-
-    Text: {
-      set text(text) {
-        item.data.text = text;
-        postMessage({ command: "setData", selector, overrideData: { text } });
-      },
-
-      get text() {
-        return item.data.text;
-      },
-    },
-
-    Iframe: {
-      set params(params) {
-        item.data.params = params;
-        postMessage({ command: "setData", selector, overrideData: { params } });
-      },
-    },
-  };
-  return properties[item.type];
+  if (!item) return null;
+  return componentSdks[item.type](item, selector);
 }
 
 // eslint-disable-next-line no-restricted-globals

@@ -1,28 +1,32 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { Item, Layout, Rerender } from "./types";
+import React, { useState } from "react";
+import {
+  ButtonProps,
+  IframeProps,
+  ImageProps,
+  InputProps,
+  Item,
+  Layout,
+  RemoteProps,
+  StructureApi,
+  TextProps,
+} from "./types";
 
-function wrapperStyle(layout: Layout): React.CSSProperties {
+function wrapperStyle({ y: top, x: left, width }: Layout): React.CSSProperties {
   return {
     position: "absolute",
-    top: `${layout.y}px`,
-    left: `${layout.x}px`,
+    top,
+    left,
+    width,
   };
 }
 
-function elementStyle(layout: Layout): React.CSSProperties {
-  const css: React.CSSProperties = {};
-
-  if (layout.width) css.width = `${layout.width}px`;
-  if (layout.height) css.height = `${layout.height}px`;
-
-  return css;
+function elementStyle({ width, height }: Layout): React.CSSProperties {
+  return {
+    width,
+    height,
+  };
 }
 
-type ButtonProps = {
-  data: { text: string };
-  style: React.CSSProperties;
-  onClick?: () => void;
-};
 function Button({ data, style, onClick }: ButtonProps): JSX.Element {
   console.log("React rendering Button");
 
@@ -33,21 +37,11 @@ function Button({ data, style, onClick }: ButtonProps): JSX.Element {
   );
 }
 
-type ImageProps = {
-  data: { src: string };
-  style: React.CSSProperties;
-};
 function Image({ data, style }: ImageProps): JSX.Element {
   console.log("React rendering Image");
 
   return <img src={data.src} alt="" style={style} />;
 }
-
-type InputProps = {
-  data: { value?: string };
-  style: React.CSSProperties;
-  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
-};
 
 function Input({ data, style, onChange }: InputProps): JSX.Element {
   console.log("React rendering Input");
@@ -55,22 +49,12 @@ function Input({ data, style, onChange }: InputProps): JSX.Element {
   return <input onChange={onChange} style={style} value={data.value} />;
 }
 
-type TextProps = {
-  data: { text: string };
-  style: React.CSSProperties;
-};
 function Text({ data }: TextProps): JSX.Element {
   console.log("React rendering Text");
 
   return <span>{data.text}</span>;
 }
 
-type IframeParams = { [key: string]: string };
-type IframeProps = {
-  id: string;
-  data: { src: string; title: string; params: IframeParams };
-  style: React.CSSProperties;
-};
 function Iframe({ id, data, style }: IframeProps): JSX.Element {
   console.log("React rendering Iframe");
 
@@ -89,21 +73,7 @@ function Iframe({ id, data, style }: IframeProps): JSX.Element {
   return <iframe src={url.href} title={data.title} style={style} />;
 }
 
-type RemoteProps = {
-  data: { src: string };
-  style: React.CSSProperties;
-};
 function Remote({ data }: RemoteProps): JSX.Element {
-  const fetchText = async (request: RequestInfo): Promise<string> => {
-    const response = await fetch(request);
-    return response.text();
-  };
-
-  useEffect(() => {
-    fetchText(data.src).then((code) => {
-      // console.log(code);
-    });
-  });
   return <div>{data.src}</div>;
 }
 
@@ -111,14 +81,14 @@ const components = { Button, Iframe, Image, Input, Remote, Text };
 
 function StructureComponent({
   item,
-  rerender,
+  structure,
 }: {
   item: Item;
-  rerender: Rerender;
+  structure: StructureApi;
 }): JSX.Element {
   const Component = components[item.type];
   const [state, setState] = useState(false);
-  rerender.add(item.id, () => setState(!state));
+  structure.setRenderer(item.id, () => setState(!state));
 
   return (
     <div style={wrapperStyle(item.layout)} id={item.id}>
@@ -128,18 +98,18 @@ function StructureComponent({
 }
 
 export default function ({
-  items,
-  rerender,
+  structure,
 }: {
-  items: Item[];
-  rerender: Rerender;
+  structure: StructureApi;
 }): JSX.Element {
   console.log("React rendering Renderer");
+
+  const items = Object.values(structure.getItems());
 
   return (
     <div id="renderer">
       {items.map((item) => (
-        <StructureComponent key={item.id} item={item} rerender={rerender} />
+        <StructureComponent key={item.id} item={item} structure={structure} />
       ))}
     </div>
   );

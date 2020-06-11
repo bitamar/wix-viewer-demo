@@ -8,8 +8,7 @@
     "layout": {
       "x": 0,
       "y": 0,
-      "width": 600,
-      "height": 400
+      "width": "100%"
     }
   },
   "city": {
@@ -51,6 +50,19 @@
       "y": 60,
       "width": 230,
       "height": 40
+    }
+  },
+  "text1": {
+    "id": "text1",
+    "type": "Text",
+    "data": {
+      "text": "init"
+    },
+    "layout": {
+      "x": 300,
+      "y": 10,
+      "width": 226,
+      "height": 35
     }
   }
 }

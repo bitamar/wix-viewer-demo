@@ -1,4 +1,4 @@
-import { Items, Rerender } from "./types";
+import { StructureApi } from "./types";
 
 type IncomingMessage = {
   command: "setData" | "setLayout" | "setOnClick" | "userCodeRan";
@@ -14,49 +14,37 @@ type OutgoingMessage = {
   overrideData?: unknown;
 };
 
-export default function (itemsMap: Items, rerender: Rerender): Promise<void> {
+export default function (structureApi: StructureApi): Promise<void> {
   const updateItem = (
     id: string,
     data: IncomingMessage,
     postMessage: (message: OutgoingMessage) => void,
   ) => {
-    const item = itemsMap[id];
-    if (!item) return;
-
     const commands: { [key: string]: () => void } = {
       setData: () => {
-        Object.assign(item.data, data.overrideData);
+        structureApi.setData(id, "data", data.overrideData);
       },
       setLayout: () => {
-        Object.assign(item.layout, data.overrideLayout);
+        structureApi.setData(id, "layout", data.overrideLayout);
       },
       setOnClick: () => {
-        item.onClick = () => {
+        structureApi.setEventListener(id, "onClick", () => {
           postMessage({
             command: "callback",
             callbackId: data.callbackId as string,
           });
-        };
+        });
       },
     };
     commands[data.command]();
-    rerender.rerender(item.id);
   };
 
   return new Promise((resolve) => {
-    window.addEventListener("message", ({ data, origin }) => {
-      if (!data?.payload?.id) return;
-      const item = itemsMap[data.payload.id];
-      if (!item) return;
+    window.addEventListener("message", ({ data }) => {
+      const { payload } = data;
+      if (!payload?.id) return;
 
-      // Check that data.payload.id and event.origin match, to prevent the iframe
-      // from altering other elements.
-      const url = new URL(item.data.src);
-      if (url.origin !== origin) return;
-
-      updateItem(item.id, data.payload, (message) => {
-        window.postMessage(message, origin);
-      });
+      structureApi.setData(payload.id, "layout", payload.overrideLayout);
     });
 
     const worker = new Worker("worker.js");
@@ -76,14 +64,14 @@ export default function (itemsMap: Items, rerender: Rerender): Promise<void> {
 
     worker.postMessage({
       command: "init",
-      itemsMap,
+      itemsMap: structureApi.getItems(),
       codeUrl: "/code.js",
     });
 
     // Adding a default onChange to all inputs, so the worker will have
     // access to input values. Doing this after the "init" postMessage,
     // because it's unable to send functions.
-    const inputs = Object.values(itemsMap).filter(
+    const inputs = Object.values(structureApi.getItems()).filter(
       (item) => item.type === "Input",
     );
     inputs.forEach((item) => {
@@ -91,15 +79,13 @@ export default function (itemsMap: Items, rerender: Rerender): Promise<void> {
       item.onChange = ({ currentTarget }) => {
         const { value } = currentTarget;
 
-        // TODO: Unify with updateItem.
-        // eslint-disable-next-line no-param-reassign
-        item.data.value = value;
+        structureApi.setData(item.id, "data", { value });
+
         worker.postMessage({
           command: "setData",
           id: item.id,
           data: item.data,
         });
-        rerender.rerender(item.id);
       };
     });
   });

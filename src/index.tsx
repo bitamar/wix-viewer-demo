@@ -3,8 +3,8 @@ import ReactDom from "react-dom";
 
 import Renderer from "./Renderer";
 import userCode from "./user-code";
-import { Items, Rerender, Rerenders } from "./types";
-import logError from "./error";
+import { Items } from "./types";
+import structureApi from "./structure";
 
 import "./index.css";
 
@@ -12,39 +12,27 @@ async function fetchJson<T>(request: RequestInfo): Promise<T> {
   const response = await fetch(request);
   return response.json();
 }
-
-const rerender: Rerender = (() => {
-  const renderers: Rerenders = {};
-
-  return {
-    add: (id: string, renderer: () => void) => {
-      renderers[id] = renderer;
-    },
-    rerender: (id: string) => {
-      if (!renderers[id]) {
-        logError("no renderer for id", id);
-        return;
-      }
-
-      renderers[id]();
-    },
-  };
-})();
-
-function render(items: Items) {
-  ReactDom.render(
-    <Renderer items={Object.values(items)} rerender={rerender} />,
-    document.getElementById("root"),
-  );
-}
+//
+// async function fetchText(request: RequestInfo): Promise<string> {
+//   const response = await fetch(request);
+//   return response.text();
+// }
 
 (async () => {
   const url = "/structure.json";
   const items = await fetchJson<Items>(url);
+  const structure = structureApi(items);
+
+  // fetchText(data.src).then((code) => {
+  // console.log(code);
+  // });
 
   // Don't render anything before first userCode run, to avoid re-rendering
   // on each worker set command.
-  await userCode(items, rerender);
+  await userCode(structure);
 
-  render(items);
+  ReactDom.render(
+    <Renderer structure={structure} />,
+    document.getElementById("root"),
+  );
 })();
