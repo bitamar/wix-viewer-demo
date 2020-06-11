@@ -1,90 +1,101 @@
-// TODO: Can the eval code be prevented from changing the callbacks list?
-
-// structureMap keeps track of everything $w need to return from getters.
-let itemsMap = new Map();
+let itemsMap = {};
 const callbacks = [];
+
+function buttonSdk(item, selector) {
+  return {
+    onClick(callback) {
+      const callbackId = callbacks.length;
+      callbacks.push(callback);
+      postMessage({ command: "setOnClick", selector, callbackId });
+    },
+
+    set text(text) {
+      item.data.text = text;
+      postMessage({ command: "setData", selector, overrideData: { text } });
+    },
+  };
+}
+
+function imageSdk(item, selector) {
+  return {
+    set src(src) {
+      item.data.src = src;
+      postMessage({ command: "setData", selector, overrideData: { src } });
+    },
+
+    get src() {
+      return item.data.src;
+    },
+  };
+}
+
+function inputSdk(item, selector) {
+  return {
+    get value() {
+      return item.data.value;
+    },
+  };
+}
+
+function textSdk(item, selector) {
+  return {
+    set text(text) {
+      item.data.text = text;
+      postMessage({ command: "setData", selector, overrideData: { text } });
+    },
+
+    get text() {
+      return item.data.text;
+    },
+  };
+}
+
+function iframeSdk(item, selector) {
+  return {
+    set params(params) {
+      item.data.params = params;
+      postMessage({ command: "setData", selector, overrideData: { params } });
+    },
+  };
+}
+
+const componentSdks = {
+  Button: buttonSdk,
+  Image: imageSdk,
+  Input: inputSdk,
+  Text: textSdk,
+  Iframe: iframeSdk,
+};
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function $w(selector) {
   const elementId = selector.substring(1);
-
   const item = itemsMap[elementId];
-  if (!item) return undefined;
+  if (!item) return null;
 
-  const properties = {
-    Button: {
-      onClick(callback) {
-        const callbackId = callbacks.length;
-        callbacks.push(callback);
-        console.log("added callback #", callbackId);
-        postMessage({ command: "setOnClick", selector, callbackId });
-      },
-
-      set text(text) {
-        item.data.text = text;
-        postMessage({ command: "setData", selector, overrideData: { text } });
-      },
-
-      get text() {
-        return item.data.text;
-      },
-    },
-
-    Image: {
-      set src(src) {
-        item.data.src = src;
-        postMessage({ command: "setData", selector, overrideData: { src } });
-      },
-
-      get src() {
-        return item.data.src;
-      },
-    },
-
-    Text: {
-      set text(text) {
-        item.data.text = text;
-        postMessage({ command: "setData", selector, overrideData: { text } });
-      },
-
-      get text() {
-        return item.data.text;
-      },
-    },
-
-    Iframe: {
-      set params(params) {
-        item.data.params = params;
-        postMessage({ command: "setData", selector, overrideData: { params } });
-      },
-
-      get params() {
-        return item.data.params;
-      },
-    },
-  };
-  return properties[item.type];
+  return componentSdks[item.type](item, selector);
 }
 
 // eslint-disable-next-line no-restricted-globals
-self.onmessage = async ({ data }) => {
-  console.log("main to userCode", data);
+self.onmessage = async ({ data: message }) => {
+  console.log("main to userCode:", message.command);
 
   const commands = {
     init: () => {
-      itemsMap = data.itemsMap;
+      itemsMap = message.itemsMap;
 
-      fetch(data.codeUrl)
+      fetch(message.codeUrl)
         .then((response) => response.text())
         // eslint-disable-next-line no-eval
         .then((code) => eval(code))
         .then(() => postMessage({ command: "userCodeRan" }));
     },
-    callback: () => callbacks[data.callbackId](),
+    setData: () => {
+      Object.assign(itemsMap[message.id].data, message.data);
+    },
+    callback: () => {
+      callbacks[message.callbackId]();
+    },
   };
-  if (!commands[data.command]) {
-    console.log(`unknown command ${data.command}`);
-    return;
-  }
-  commands[data.command]();
+  commands[message.command]();
 };

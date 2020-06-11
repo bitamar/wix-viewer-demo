@@ -1,16 +1,24 @@
 /* eslint-disable */
-$w("#text1").text = "works";
 
-$w("#button1").onClick(() => {
-  $w("#image1").src = "https://html.com/wp-content/uploads/flamingo.jpg";
-  $w("#button1").onClick(() => {
-    $w("#image1").src =
-      "https://cdn.shopify.com/s/files/1/0065/4917/6438/products/a-dancing-flamingo-and-fires-of-hell-background_1024x1024@2x.jpg?v=1533918868";
-  });
-});
+function setCity() {
+  const images = {
+    Jerusalem: "/images/Jerusalem.jpg",
+    "Tel Aviv-Yafo": "/images/Tel Aviv-Yafo.jpg",
+  };
+
+  const currentCity = $w("#city").value;
+
+  $w("#text1").text = currentCity;
+
+  $w("#image1").src = images[currentCity]
+    ? images[currentCity]
+    : "https://static.wixstatic.com/media/11062b_3a11c4fcf7e1427ca0ac0c7fd142676e~mv2_d_5565_3710_s_4_2.jpg/v1/fill/w_600,h_400,al_c,q_80,usm_0.66_1.00_0.01/Golf%20Cart.webp";
+
+  $w("#iframe1").params = { city: currentCity };
+}
+
+setCity();
 
 $w("#button2").onClick(() => {
-  $w("#button2").text = $w("#iframe1").params.city;
-  const city = $w("#iframe1").params.city === "Baku" ? "Tel Aviv-Yafo" : "Baku";
-  $w("#iframe1").params = { city };
+  setCity();
 });
