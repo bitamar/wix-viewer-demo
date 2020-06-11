@@ -3,6 +3,7 @@ import ReactDom from "react-dom";
 
 import Renderer from "./Renderer";
 import userCode from "./user-code";
+import windowMessages from "./window-messages";
 import { Items } from "./types";
 import structureApi from "./structure";
 
@@ -29,6 +30,7 @@ async function fetchJson<T>(request: RequestInfo): Promise<T> {
 
   // Don't render anything before first userCode run, to avoid re-rendering
   // on each worker set command.
+  windowMessages(structure);
   await userCode(structure);
 
   ReactDom.render(

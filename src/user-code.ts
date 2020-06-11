@@ -14,7 +14,40 @@ type OutgoingMessage = {
   overrideData?: unknown;
 };
 
-export default function (structureApi: StructureApi): Promise<void> {
+// Adding a default onChange to all inputs, so the worker will have
+// access to input values. Doing this after the "init" postMessage,
+// because it's unable to send functions.
+function setDefaultEvents(structure: StructureApi, worker: Worker) {
+  const inputs = Object.values(structure.getItems()).filter(
+    (item) => item.type === "Input",
+  );
+  inputs.forEach((item) => {
+    // eslint-disable-next-line no-param-reassign
+    item.onChange = ({ currentTarget }) => {
+      const { value } = currentTarget;
+
+      structure.setData(item.id, "data", { value });
+
+      worker.postMessage({
+        command: "setData",
+        id: item.id,
+        data: item.data,
+      });
+    };
+  });
+}
+
+export default function (structure: StructureApi): Promise<void> {
+  const worker = new Worker("worker.js");
+
+  worker.postMessage({
+    command: "init",
+    itemsMap: structure.getItems(),
+    codeUrl: "/code.js",
+  });
+
+  setDefaultEvents(structure, worker);
+
   const updateItem = (
     id: string,
     data: IncomingMessage,
@@ -22,13 +55,13 @@ export default function (structureApi: StructureApi): Promise<void> {
   ) => {
     const commands: { [key: string]: () => void } = {
       setData: () => {
-        structureApi.setData(id, "data", data.overrideData);
+        structure.setData(id, "data", data.overrideData);
       },
       setLayout: () => {
-        structureApi.setData(id, "layout", data.overrideLayout);
+        structure.setData(id, "layout", data.overrideLayout);
       },
       setOnClick: () => {
-        structureApi.setEventListener(id, "onClick", () => {
+        structure.setEventListener(id, "onClick", () => {
           postMessage({
             command: "callback",
             callbackId: data.callbackId as string,
@@ -40,53 +73,18 @@ export default function (structureApi: StructureApi): Promise<void> {
   };
 
   return new Promise((resolve) => {
-    window.addEventListener("message", ({ data }) => {
-      const { payload } = data;
-      if (!payload?.id) return;
-
-      structureApi.setData(payload.id, "layout", payload.overrideLayout);
-    });
-
-    const worker = new Worker("worker.js");
-
     worker.onmessage = ({ data }: { data: IncomingMessage }) => {
-      console.log("worker to main", data);
+      console.log("worker to main:", data.command);
 
       if (data.command === "userCodeRan") {
         resolve();
         return;
       }
 
+      // TODO: convert selector to ID in structure api.
       updateItem(data.selector.substring(1), data, (message) => {
         worker.postMessage(message);
       });
     };
-
-    worker.postMessage({
-      command: "init",
-      itemsMap: structureApi.getItems(),
-      codeUrl: "/code.js",
-    });
-
-    // Adding a default onChange to all inputs, so the worker will have
-    // access to input values. Doing this after the "init" postMessage,
-    // because it's unable to send functions.
-    const inputs = Object.values(structureApi.getItems()).filter(
-      (item) => item.type === "Input",
-    );
-    inputs.forEach((item) => {
-      // eslint-disable-next-line no-param-reassign
-      item.onChange = ({ currentTarget }) => {
-        const { value } = currentTarget;
-
-        structureApi.setData(item.id, "data", { value });
-
-        worker.postMessage({
-          command: "setData",
-          id: item.id,
-          data: item.data,
-        });
-      };
-    });
   });
 }

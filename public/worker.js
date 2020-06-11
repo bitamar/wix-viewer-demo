@@ -72,12 +72,13 @@ function $w(selector) {
   const elementId = selector.substring(1);
   const item = itemsMap[elementId];
   if (!item) return null;
+
   return componentSdks[item.type](item, selector);
 }
 
 // eslint-disable-next-line no-restricted-globals
 self.onmessage = async ({ data: message }) => {
-  console.log("main to userCode", message);
+  console.log("main to userCode:", message.command);
 
   const commands = {
     init: () => {
