@@ -2,8 +2,8 @@
 
 function setCity() {
   const images = {
-    Jerusalem: "/images/Jerusalem.jpg",
-    "Tel Aviv-Yafo": "/images/Tel Aviv-Yafo.jpg",
+    Jerusalem: "/weather/images/Jerusalem.jpg",
+    "Tel Aviv-Yafo": "/weather/images/Tel Aviv-Yafo.jpg",
   };
 
   const currentCity = $w("#city").value;

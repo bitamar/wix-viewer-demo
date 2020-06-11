@@ -37,13 +37,16 @@ function setDefaultEvents(structure: StructureApi, worker: Worker) {
   });
 }
 
-export default function (structure: StructureApi): Promise<void> {
+export default function (
+  siteBaseUrl: string,
+  structure: StructureApi,
+): Promise<void> {
   const worker = new Worker("worker.js");
 
   worker.postMessage({
     command: "init",
     itemsMap: structure.getItems(),
-    codeUrl: "/code.js",
+    codeUrl: `${siteBaseUrl}/code.js`,
   });
 
   setDefaultEvents(structure, worker);
