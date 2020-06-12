@@ -1,0 +1,42 @@
+{
+  "remote1": {
+    "id": "remote1",
+    "type": "Remote",
+    "data": {
+      "componentName": "SomeRemote",
+      "src": "http://also.local:3001/remote/remote.js"
+    },
+    "layout": {
+      "x": 200,
+      "y": 100,
+      "width": 226,
+      "height": 35
+    }
+  },
+  "button1": {
+    "id": "button1",
+    "type": "Button",
+    "data": {
+      "text": "▶"
+    },
+    "layout": {
+      "x": 200,
+      "y": 2,
+      "width": 40,
+      "height": 38
+    }
+  },
+  "text1": {
+    "id": "text1",
+    "type": "Text",
+    "data": {
+      "text": "initial"
+    },
+    "layout": {
+      "x": 300,
+      "y": 10,
+      "width": 226,
+      "height": 35
+    }
+  }
+}

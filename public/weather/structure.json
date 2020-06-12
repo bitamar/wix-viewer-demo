@@ -41,7 +41,7 @@
     "id": "iframe1",
     "type": "Iframe",
     "data": {
-      "src": "http://also.local:3001/iframe.html",
+      "src": "http://also.local:3001/weather/iframe.html",
       "title": "why does an iframe needs a title? when is this used?",
       "params": { "city": "Tel Aviv-Yafo" }
     },

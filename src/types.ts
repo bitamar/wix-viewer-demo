@@ -36,12 +36,20 @@ export interface IframeProps extends ComponentProps {
 }
 
 export interface RemoteProps extends ComponentProps {
-  data: { src: string };
+  data: { componentName: string; src: string };
 }
+
+export type ItemType =
+  | "Button"
+  | "Iframe"
+  | "Image"
+  | "Input"
+  | "Remote"
+  | "Text";
 
 export type Item = {
   id: string;
-  type: "Button" | "Iframe" | "Image" | "Input" | "Remote" | "Text";
+  type: ItemType;
   data: any;
   layout: Layout;
   onClick?: () => void;
@@ -60,5 +68,6 @@ export type StructureApi = {
     event: "onClick" | "onChange",
     cb: () => void,
   ) => void;
-  getItems: () => Items;
+  getItems: (typeFilter?: ItemType) => Items;
+  getItemsByType: (typeFilter: ItemType) => Item[];
 };

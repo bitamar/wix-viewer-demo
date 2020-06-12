@@ -6,10 +6,10 @@ import {
   InputProps,
   Item,
   Layout,
-  RemoteProps,
   StructureApi,
   TextProps,
 } from "./types";
+import Remote from "./RemoteRenderer";
 
 function wrapperStyle({ y: top, x: left, width }: Layout): React.CSSProperties {
   return {
@@ -73,10 +73,6 @@ function Iframe({ id, data, style }: IframeProps): JSX.Element {
   return <iframe src={url.href} title={data.title} style={style} />;
 }
 
-function Remote({ data }: RemoteProps): JSX.Element {
-  return <div>{data.src}</div>;
-}
-
 const components = { Button, Iframe, Image, Input, Remote, Text };
 
 function StructureComponent({
@@ -107,10 +103,10 @@ export default function ({
   const items = Object.values(structure.getItems());
 
   return (
-    <div id="renderer">
+    <>
       {items.map((item) => (
         <StructureComponent key={item.id} item={item} structure={structure} />
       ))}
-    </div>
+    </>
   );
 }

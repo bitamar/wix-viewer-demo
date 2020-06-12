@@ -29,7 +29,7 @@ function imageSdk(item, selector) {
   };
 }
 
-function inputSdk(item, selector) {
+function inputSdk(item) {
   return {
     get value() {
       return item.data.value;

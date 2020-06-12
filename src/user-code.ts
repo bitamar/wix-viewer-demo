@@ -18,9 +18,7 @@ type OutgoingMessage = {
 // access to input values. Doing this after the "init" postMessage,
 // because it's unable to send functions.
 function setDefaultEvents(structure: StructureApi, worker: Worker) {
-  const inputs = Object.values(structure.getItems()).filter(
-    (item) => item.type === "Input",
-  );
+  const inputs = structure.getItemsByType("Input");
   inputs.forEach((item) => {
     // eslint-disable-next-line no-param-reassign
     item.onChange = ({ currentTarget }) => {

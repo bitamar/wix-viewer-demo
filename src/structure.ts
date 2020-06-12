@@ -1,5 +1,5 @@
-import { Items, StructureApi } from "./types";
-import logError from "./error";
+import { Item, Items, ItemType, StructureApi } from "./types";
+import logError from "./utils";
 
 export default function (items: Items): StructureApi {
   const renderers: {
@@ -36,5 +36,8 @@ export default function (items: Items): StructureApi {
       render(id);
     },
     getItems: (): Items => items,
+    getItemsByType: (type: ItemType): Item[] => {
+      return Object.values(items).filter((item) => item.type === type);
+    },
   };
 }
